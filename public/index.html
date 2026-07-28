@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeIQ — AI Resume Analyzer</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-mark">R</span>
+        <span class="logo-text">esumeIQ</span>
+      </div>
+      <p class="header-sub">AI-Powered Resume Intelligence</p>
+    </div>
+  </header>
+
+  <!-- ── Main ───────────────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- ── Upload Screen ──────────────────────────────────────────────── -->
+    <section class="screen" id="uploadScreen">
+      <div class="hero-text">
+        <h1>Know exactly where<br/><em>your resume stands.</em></h1>
+        <p class="hero-sub">Upload your resume PDF and get a detailed AI analysis — section scores, strengths, weaknesses, ATS compatibility, and a prioritised action plan.</p>
+      </div>
+
+      <div class="upload-card" id="uploadCard">
+        <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Upload resume PDF">
+          <div class="drop-icon-wrap">
+            <svg class="drop-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M20 6v22M20 6L12 14M20 6l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 32h28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="drop-primary">Drop your resume PDF here</p>
+          <p class="drop-secondary">or click to browse — PDF only, max 5 MB</p>
+          <input type="file" id="fileInput" accept=".pdf,application/pdf" hidden />
+        </div>
+
+        <div class="file-pill hidden" id="filePill">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="14" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span id="fileName">resume.pdf</span>
+          <button id="removeFile" aria-label="Remove">✕</button>
+        </div>
+
+        <button class="btn-analyze" id="analyzeBtn" disabled>
+          <span>Analyze My Resume</span>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div class="error-bar hidden" id="errorBar">
+          <span>⚠</span><span id="errorMsg">Something went wrong.</span>
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature-item"><span class="feature-icon">◈</span><span>Section-by-section scoring</span></div>
+        <div class="feature-item"><span class="feature-icon">◈</span><span>ATS compatibility check</span></div>
+        <div class="feature-item"><span class="feature-icon">◈</span><span>Prioritised action plan</span></div>
+        <div class="feature-item"><span class="feature-icon">◈</span><span>Keyword gap analysis</span></div>
+      </div>
+    </section>
+
+    <!-- ── Loading Screen ─────────────────────────────────────────────── -->
+    <section class="screen hidden" id="loadingScreen">
+      <div class="loading-wrap">
+        <div class="loading-orb">
+          <div class="orb-ring r1"></div>
+          <div class="orb-ring r2"></div>
+          <div class="orb-ring r3"></div>
+          <span class="orb-label">AI</span>
+        </div>
+        <h2 class="loading-title">Analyzing your resume…</h2>
+        <div class="loading-steps">
+          <div class="lstep active" id="ls1"><span class="lstep-dot"></span><span>Extracting resume content</span></div>
+          <div class="lstep" id="ls2"><span class="lstep-dot"></span><span>Scoring each section</span></div>
+          <div class="lstep" id="ls3"><span class="lstep-dot"></span><span>Identifying strengths &amp; weaknesses</span></div>
+          <div class="lstep" id="ls4"><span class="lstep-dot"></span><span>Building action plan</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Results Screen ─────────────────────────────────────────────── -->
+    <section class="screen hidden" id="resultsScreen">
+
+      <!-- Top bar -->
+      <div class="results-topbar">
+        <div>
+          <div class="results-label">Resume Analysis Report</div>
+          <div class="results-name" id="rCandidateName">Candidate</div>
+        </div>
+        <button class="btn-reset" id="resetBtn">← New Resume</button>
+      </div>
+
+      <!-- Score hero -->
+      <div class="score-hero">
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="50" />
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="50"
+              stroke-dasharray="314.16"
+              stroke-dashoffset="314.16" />
+          </svg>
+          <div class="score-number-wrap">
+            <span class="score-number" id="scoreNumber">0</span>
+            <span class="score-denom">/100</span>
+          </div>
+        </div>
+        <div class="score-meta">
+          <div class="score-grade" id="scoreGrade">—</div>
+          <p class="score-verdict" id="scoreVerdict">Loading...</p>
+          <div class="score-pills">
+            <span class="meta-pill"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 4v4M6 3v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> <span id="rTargetRole">—</span></span>
+            <span class="meta-pill ats-pill">ATS: <strong id="rAtsScore">—</strong>/100</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section scores grid -->
+      <div class="section-title-row">
+        <h2 class="section-heading">Section Analysis</h2>
+        <p class="section-heading-sub">Click any section for detailed feedback</p>
+      </div>
+
+      <div class="sections-grid" id="sectionsGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Detail panel (shown on click) -->
+      <div class="detail-panel hidden" id="detailPanel">
+        <div class="detail-header">
+          <div>
+            <span class="detail-section-name" id="detailName">Section</span>
+            <span class="detail-badge" id="detailBadge">—</span>
+          </div>
+          <button class="detail-close" id="detailClose">✕</button>
+        </div>
+        <div class="detail-score-row">
+          <div class="detail-score-bar-wrap">
+            <div class="detail-score-bar" id="detailBar"></div>
+          </div>
+          <span class="detail-score-val" id="detailScore">0</span>
+        </div>
+        <p class="detail-feedback" id="detailFeedback">—</p>
+        <div class="detail-improvements" id="detailImprovements"></div>
+      </div>
+
+      <!-- Two-column: strengths & weaknesses -->
+      <div class="sw-grid">
+        <div class="sw-card strong-card">
+          <div class="sw-label"><span class="sw-icon">✦</span> Strengths</div>
+          <ul class="sw-list" id="strengthsList"></ul>
+        </div>
+        <div class="sw-card weak-card">
+          <div class="sw-label"><span class="sw-icon">△</span> Needs Work</div>
+          <ul class="sw-list" id="weaknessesList"></ul>
+        </div>
+      </div>
+
+      <!-- Action plan -->
+      <div class="action-card">
+        <div class="action-header">
+          <h3>Prioritised Action Plan</h3>
+          <p>Fixes ranked by impact — tackle high priority items first</p>
+        </div>
+        <div class="action-list" id="actionList"></div>
+      </div>
+
+      <!-- Keywords & ATS row -->
+      <div class="kw-ats-grid">
+        <div class="kw-card">
+          <div class="kw-header">
+            <h3>Keywords Found</h3>
+            <span class="kw-count" id="kwFoundCount">0</span>
+          </div>
+          <div class="kw-pills" id="kwFound"></div>
+        </div>
+        <div class="kw-card missing-card">
+          <div class="kw-header">
+            <h3>Missing Keywords</h3>
+            <span class="kw-count miss-count" id="kwMissCount">0</span>
+          </div>
+          <div class="kw-pills" id="kwMissing"></div>
+          <p class="ats-note" id="atsFeedback"></p>
+        </div>
+      </div>
+
+      <!-- Industry fit -->
+      <div class="industry-card">
+        <div class="industry-label">Industry Fit Assessment</div>
+        <p class="industry-text" id="industryFit"></p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>Powered by <strong>Azure Document Intelligence</strong> &amp; <strong>Google Gemini AI</strong></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
